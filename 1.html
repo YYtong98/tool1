@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>公司设立与增资扩股计算器</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; line-height: 1.6; }
+    table, th, td { border: 1px solid #888; border-collapse: collapse; padding: 8px; }
+    th { background-color: #f0f0f0; }
+    input { width: 100px; }
+    .section { margin-top: 40px; }
+    #alert, #alert2 { color: red; font-weight: bold; margin-top: 10px; }
+    h1, h2 { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+<h1>公司设立与增资扩股计算器</h1>
+<p><strong>使用说明：</strong></p>
+<ul>
+  <li><strong>阶段一</strong>：输入原始注册资本、股东持股比例与出资额，计算资本公积。</li>
+  <li><strong>阶段二</strong>：输入本轮各股东新增出资与计入注册资本金额，计算增后注册资本、新股东比例、资本公积。</li>
+  <li>注册资本决定持股比例，资本公积不影响股份，仅记入出资但不产生股权。</li>
+  <li>为避免四舍五入导致股比总和超过100%，本系统对股权比例做归一化处理。</li>
+</ul>
+
+<!-- 阶段一 -->
+<h2>阶段一：公司设立阶段</h2>
+<label>注册资本（元）：<input type="number" id="initCapital" value="1000000"></label><br><br>
+
+<table>
+  <thead>
+    <tr>
+      <th>股东</th>
+      <th>持股比例 (%)</th>
+      <th>实际出资额 (元)</th>
+      <th>应出资额 (元)</th>
+      <th>资本公积金 (元)</th>
+    </tr>
+  </thead>
+  <tbody id="setupTable">
+    <tr><td>A</td><td><input type="number" id="A_ratio" value="25"></td><td><input type="number" id="A_paid" value="250000"></td><td id="A_expected"></td><td id="A_premium"></td></tr>
+    <tr><td>B</td><td><input type="number" id="B_ratio" value="25"></td><td><input type="number" id="B_paid" value="250000"></td><td id="B_expected"></td><td id="B_premium"></td></tr>
+    <tr><td>C</td><td><input type="number" id="C_ratio" value="25"></td><td><input type="number" id="C_paid" value="250000"></td><td id="C_expected"></td><td id="C_premium"></td></tr>
+    <tr><td>D</td><td><input type="number" id="D_ratio" value="25"></td><td><input type="number" id="D_paid" value="250000"></td><td id="D_expected"></td><td id="D_premium"></td></tr>
+  </tbody>
+</table>
+
+<div id="alert"></div>
+<br>
+<button onclick="calculateSetup()">计算设立阶段</button>
+
+<!-- 阶段二 -->
+<div class="section">
+  <h2>阶段二：增资扩股阶段</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>股东</th>
+        <th>原注册资本</th>
+        <th>原总出资额</th>
+        <th>新增出资额</th>
+        <th>计入注册资本</th>
+        <th>新增资本公积</th>
+        <th>增后注册资本</th>
+        <th>增后总出资额</th>
+        <th>新持股比例 (%)</th>
+      </tr>
+    </thead>
+    <tbody id="increaseTable">
+      <tr><td>A</td><td id="A_reg0"></td><td id="A_paid0"></td><td><input type="number" id="A_add" value="0"></td><td><input type="number" id="A_add_reg" value="0"></td><td id="A_premium_add"></td><td id="A_reg1"></td><td id="A_paid1"></td><td id="A_ratio_new"></td></tr>
+      <tr><td>B</td><td id="B_reg0"></td><td id="B_paid0"></td><td><input type="number" id="B_add" value="0"></td><td><input type="number" id="B_add_reg" value="0"></td><td id="B_premium_add"></td><td id="B_reg1"></td><td id="B_paid1"></td><td id="B_ratio_new"></td></tr>
+      <tr><td>C</td><td id="C_reg0"></td><td id="C_paid0"></td><td><input type="number" id="C_add" value="0"></td><td><input type="number" id="C_add_reg" value="0"></td><td id="C_premium_add"></td><td id="C_reg1"></td><td id="C_paid1"></td><td id="C_ratio_new"></td></tr>
+      <tr><td>D</td><td id="D_reg0"></td><td id="D_paid0"></td><td><input type="number" id="D_add" value="0"></td><td><input type="number" id="D_add_reg" value="0"></td><td id="D_premium_add"></td><td id="D_reg1"></td><td id="D_paid1"></td><td id="D_ratio_new"></td></tr>
+      <tr><td>新股东1</td><td>0</td><td>0</td><td><input type="number" id="X1_add" value="0"></td><td><input type="number" id="X1_add_reg" value="0"></td><td id="X1_premium_add"></td><td id="X1_reg1"></td><td id="X1_paid1"></td><td id="X1_ratio_new"></td></tr>
+      <tr><td>新股东2</td><td>0</td><td>0</td><td><input type="number" id="X2_add" value="0"></td><td><input type="number" id="X2_add_reg" value="0"></td><td id="X2_premium_add"></td><td id="X2_reg1"></td><td id="X2_paid1"></td><td id="X2_ratio_new"></td></tr>
+      <tr><td>新股东3</td><td>0</td><td>0</td><td><input type="number" id="X3_add" value="0"></td><td><input type="number" id="X3_add_reg" value="0"></td><td id="X3_premium_add"></td><td id="X3_reg1"></td><td id="X3_paid1"></td><td id="X3_ratio_new"></td></tr>
+      <tr><td>新股东4</td><td>0</td><td>0</td><td><input type="number" id="X4_add" value="0"></td><td><input type="number" id="X4_add_reg" value="0"></td><td id="X4_premium_add"></td><td id="X4_reg1"></td><td id="X4_paid1"></td><td id="X4_ratio_new"></td></tr>
+      <tr><td>新股东5</td><td>0</td><td>0</td><td><input type="number" id="X5_add" value="0"></td><td><input type="number" id="X5_add_reg" value="0"></td><td id="X5_premium_add"></td><td id="X5_reg1"></td><td id="X5_paid1"></td><td id="X5_ratio_new"></td></tr>
+    </tbody>
+  </table>
+
+  <div id="alert2"></div><br>
+  <button onclick="calculateIncrease()">计算增资阶段</button>
+</div>
+
+<script>
+let shareholders = ['A', 'B', 'C', 'D'];
+let newShareholders = ['X1', 'X2', 'X3', 'X4', 'X5'];
+let allShareholders = [...shareholders, ...newShareholders];
+let regCapital = {}, paidCapital = {}, originalCapital = 0;
+
+function calculateSetup() {
+  originalCapital = parseFloat(document.getElementById("initCapital").value);
+  let totalRatio = 0;
+  shareholders.forEach(sh => totalRatio += parseFloat(document.getElementById(`${sh}_ratio`).value) || 0);
+  if (totalRatio > 100) {
+    document.getElementById("alert").innerText = `错误：总持股比例为 ${totalRatio.toFixed(2)}%，超过100%。请调整比例。`;
+    return;
+  } else document.getElementById("alert").innerText = '';
+
+  shareholders.forEach(sh => {
+    const ratio = (parseFloat(document.getElementById(`${sh}_ratio`).value) || 0) / 100;
+    const paid = parseFloat(document.getElementById(`${sh}_paid`).value) || 0;
+    const expected = originalCapital * ratio;
+    regCapital[sh] = expected;
+    paidCapital[sh] = paid;
+    document.getElementById(`${sh}_expected`).innerText = expected.toFixed(2);
+    document.getElementById(`${sh}_premium`).innerText = (paid - expected).toFixed(2);
+    document.getElementById(`${sh}_reg0`).innerText = expected.toFixed(2);
+    document.getElementById(`${sh}_paid0`).innerText = paid.toFixed(2);
+  });
+}
+
+function calculateIncrease() {
+  let totalNewReg = 0;
+  let regAfter = {}, paidAfter = {};
+
+  allShareholders.forEach(sh => {
+    const add = parseFloat(document.getElementById(`${sh}_add`).value) || 0;
+    const add_reg = parseFloat(document.getElementById(`${sh}_add_reg`).value) || 0;
+    const reg0 = regCapital[sh] || 0;
+    const paid0 = paidCapital[sh] || 0;
+
+    const premium = add - add_reg;
+    document.getElementById(`${sh}_premium_add`).innerText = premium.toFixed(2);
+
+    regAfter[sh] = reg0 + add_reg;
+    paidAfter[sh] = paid0 + add;
+
+    totalNewReg += add_reg;
+
+    document.getElementById(`${sh}_reg1`).innerText = regAfter[sh].toFixed(2);
+    document.getElementById(`${sh}_paid1`).innerText = paidAfter[sh].toFixed(2);
+  });
+
+  const totalRegCapital = originalCapital + totalNewReg;
+
+  // 持股比例归一化计算
+  let rawRatios = {}, ratioSum = 0;
+  allShareholders.forEach(sh => {
+    rawRatios[sh] = regAfter[sh] / totalRegCapital;
+    ratioSum += rawRatios[sh];
+  });
+
+  allShareholders.forEach(sh => {
+    const normalized = rawRatios[sh] / ratioSum * 100;
+    document.getElementById(`${sh}_ratio_new`).innerText = isNaN(normalized) ? '-' : normalized.toFixed(2);
+  });
+}
+</script>
+
+</body>
+</html>
